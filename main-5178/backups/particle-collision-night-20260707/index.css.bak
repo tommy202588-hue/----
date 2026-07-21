@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Scrollbar for Text Card */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Smooth viewport transitions for focus animations */
+.viewport-transition {
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.animated-canvas-gradient {
+  background-size:
+    145% 145%,
+    150% 150%,
+    140% 140%,
+    160% 160%,
+    220% 220%;
+  background-position:
+    0% 0%,
+    100% 0%,
+    50% 100%,
+    0% 100%,
+    0% 50%;
+  animation: canvas-gradient-drift 26s ease-in-out infinite alternate;
+}
+
+.animated-canvas-gradient-dark {
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(34, 211, 238, 0.13), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(99, 102, 241, 0.14), transparent 32%),
+    radial-gradient(circle at 62% 86%, rgba(16, 185, 129, 0.10), transparent 34%),
+    radial-gradient(circle at 10% 92%, rgba(244, 114, 182, 0.055), transparent 28%),
+    linear-gradient(135deg, #06080d 0%, #10131d 36%, #071016 66%, #0b0d14 100%);
+}
+
+.animated-canvas-gradient-light {
+  background-image:
+    radial-gradient(circle at 16% 10%, rgba(36, 148, 170, 0.16), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(111, 126, 210, 0.16), transparent 32%),
+    radial-gradient(circle at 58% 88%, rgba(47, 172, 151, 0.13), transparent 34%),
+    radial-gradient(circle at 8% 90%, rgba(170, 134, 190, 0.09), transparent 28%),
+    linear-gradient(135deg, #f8fbfd 0%, #e8f0f7 38%, #f4f7fb 68%, #dde8ef 100%);
+}
+
+@keyframes canvas-gradient-drift {
+  0% {
+    background-position:
+      0% 0%,
+      100% 0%,
+      50% 100%,
+      0% 100%,
+      0% 50%;
+  }
+  50% {
+    background-position:
+      40% 18%,
+      70% 34%,
+      64% 72%,
+      24% 82%,
+      55% 48%;
+  }
+  100% {
+    background-position:
+      22% 38%,
+      46% 12%,
+      78% 58%,
+      38% 66%,
+      100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-canvas-gradient {
+    animation: none;
+  }
+}

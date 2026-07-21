@@ -1,0 +1,162 @@
+import React, { useEffect, useRef } from 'react';
+
+const GRID_GAP = 28;
+const BASE_PARTICLE_RADIUS = 1.7;
+const MAX_PARTICLE_RADIUS = 8.8;
+const INTERACTION_RADIUS = 170;
+const AMBIENT_GLOW_RADIUS = 245;
+
+interface ParticleCanvasProps {
+    theme?: 'dark' | 'light';
+}
+
+const ParticleCanvas: React.FC<ParticleCanvasProps> = ({ theme = 'dark' }) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const mouseRef = useRef({ x: -9999, y: -9999, active: false });
+    const smoothMouseRef = useRef({ x: -9999, y: -9999 });
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        let animationFrameId = 0;
+        let width = 0;
+        let height = 0;
+        let dpr = 1;
+        const isLight = theme === 'light';
+        const palette = isLight
+            ? {
+                base: '55, 71, 92',
+                active: '11, 101, 128',
+                ambientStart: 'rgba(45, 160, 185, 0.07)',
+                ambientMid: 'rgba(93, 110, 220, 0.024)',
+                ambientEnd: 'rgba(93, 110, 220, 0)',
+                glowStart: 'rgba(86, 201, 214, ',
+                glowMid: 'rgba(48, 128, 158, '
+            }
+            : {
+                base: '178, 226, 236',
+                active: '216, 255, 250',
+                ambientStart: 'rgba(118, 246, 232, 0.072)',
+                ambientMid: 'rgba(80, 178, 255, 0.026)',
+                ambientEnd: 'rgba(80, 178, 255, 0)',
+                glowStart: 'rgba(190, 255, 246, ',
+                glowMid: 'rgba(34, 211, 238, '
+            };
+
+        const resize = () => {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = Math.floor(width * dpr);
+            canvas.height = Math.floor(height * dpr);
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        };
+
+        const handlePointerMove = (event: PointerEvent) => {
+            mouseRef.current = { x: event.clientX, y: event.clientY, active: true };
+        };
+
+        const handlePointerLeave = () => {
+            mouseRef.current.active = false;
+        };
+
+        const draw = () => {
+            ctx.clearRect(0, 0, width, height);
+
+            const target = mouseRef.current.active
+                ? mouseRef.current
+                : { x: width * 0.5, y: height * 0.5 };
+            const smooth = smoothMouseRef.current;
+            smooth.x += (target.x - smooth.x) * 0.16;
+            smooth.y += (target.y - smooth.y) * 0.16;
+
+            const radius = mouseRef.current.active ? INTERACTION_RADIUS : 0;
+            const radiusSq = radius * radius;
+
+            ctx.save();
+            ctx.globalCompositeOperation = isLight ? 'multiply' : 'screen';
+
+            if (mouseRef.current.active) {
+                const ambientGlow = ctx.createRadialGradient(
+                    smooth.x,
+                    smooth.y,
+                    0,
+                    smooth.x,
+                    smooth.y,
+                    AMBIENT_GLOW_RADIUS
+                );
+                ambientGlow.addColorStop(0, palette.ambientStart);
+                ambientGlow.addColorStop(0.48, palette.ambientMid);
+                ambientGlow.addColorStop(1, palette.ambientEnd);
+                ctx.fillStyle = ambientGlow;
+                ctx.beginPath();
+                ctx.arc(smooth.x, smooth.y, AMBIENT_GLOW_RADIUS, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            for (let y = GRID_GAP / 2; y < height; y += GRID_GAP) {
+                for (let x = GRID_GAP / 2; x < width; x += GRID_GAP) {
+                    const dx = x - smooth.x;
+                    const dy = y - smooth.y;
+                    const distSq = dx * dx + dy * dy;
+                    const influence = radius > 0 && distSq < radiusSq
+                        ? Math.pow(1 - Math.sqrt(distSq) / radius, 2.2)
+                        : 0;
+                    const particleRadius = BASE_PARTICLE_RADIUS + influence * MAX_PARTICLE_RADIUS;
+                    const coreAlpha = influence > 0
+                        ? (isLight ? 0.14 + influence * 0.32 : 0.16 + influence * 0.4)
+                        : (isLight ? 0.095 : 0.115);
+                    const middleAlpha = influence > 0
+                        ? (isLight ? 0.045 + influence * 0.11 : 0.052 + influence * 0.14)
+                        : (isLight ? 0.025 : 0.032);
+                    const outerAlpha = influence * (isLight ? 0.024 : 0.032);
+                    const particle = ctx.createRadialGradient(x, y, 0, x, y, particleRadius);
+                    particle.addColorStop(0, `rgba(${influence > 0 ? palette.active : palette.base}, ${coreAlpha})`);
+                    particle.addColorStop(0.28, `${palette.glowStart}${middleAlpha})`);
+                    particle.addColorStop(0.68, `${palette.glowMid}${outerAlpha})`);
+                    particle.addColorStop(1, `${palette.glowMid}0)`);
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, particleRadius, 0, Math.PI * 2);
+                    ctx.fillStyle = particle;
+                    ctx.fill();
+                }
+            }
+
+            ctx.restore();
+            animationFrameId = requestAnimationFrame(draw);
+        };
+
+        resize();
+        draw();
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerleave', handlePointerLeave);
+        window.addEventListener('blur', handlePointerLeave);
+
+        return () => {
+            cancelAnimationFrame(animationFrameId);
+            window.removeEventListener('resize', resize);
+            window.removeEventListener('pointermove', handlePointerMove);
+            window.removeEventListener('pointerleave', handlePointerLeave);
+            window.removeEventListener('blur', handlePointerLeave);
+        };
+    }, [theme]);
+
+    return (
+        <canvas
+            ref={canvasRef}
+            className="absolute inset-0 z-0 pointer-events-none"
+            aria-hidden="true"
+        />
+    );
+};
+
+export default ParticleCanvas;
