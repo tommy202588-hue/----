@@ -678,7 +678,7 @@ export const initializeSettings = (): AppSettings => {
 
 // 瀵煎嚭閰嶇疆涓篔SON鏂囦欢
 export const exportSettings = (settings: AppSettings) => {
-    const dataStr = JSON.stringify(sanitizeSettingsForExport(settings), null, 2);
+    const dataStr = JSON.stringify(settings, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
