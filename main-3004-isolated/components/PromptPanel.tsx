@@ -460,6 +460,17 @@ const PromptPanel: React.FC<PromptPanelProps> = ({ initialPrompt = '', initialPa
     const escapeRegex = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const createImageMentionRegex = (mention: string) => new RegExp(`@${escapeRegex(mention)}(?!\\d)`, 'g');
     const createCharacterMentionRegex = (username: string) => new RegExp(`@${escapeRegex(username)}(?![\\w-])`, 'g');
+    const getEditorPlainText = (element: HTMLElement) => {
+        const clone = element.cloneNode(true) as HTMLElement;
+        const mentions = clone.querySelectorAll('.mention-tag');
+        mentions.forEach(el => {
+            const value = el.getAttribute('data-mention-value') || el.getAttribute('data-username') || el.getAttribute('data-image-id') || '';
+            el.replaceWith(`@${value}`);
+        });
+
+        const text = clone.innerText;
+        return text === '\n' ? '' : text;
+    };
 
     // Helper: Format text to HTML with mentions
     // Helper: Format text to HTML with mentions
@@ -494,6 +505,11 @@ const PromptPanel: React.FC<PromptPanelProps> = ({ initialPrompt = '', initialPa
         prevInitialRef.current = initialPrompt;
 
         if (initialChanged) {
+            const currentEditorText = getEditorPlainText(contentRef.current);
+            if (currentEditorText === (initialPrompt || '')) {
+                return;
+            }
+
             // Only force reset DOM if the new prop is different from current state
             // This prevents cursor jumps when parent echoes back the input value
             if (initialPrompt !== prompt) {
@@ -528,17 +544,7 @@ const PromptPanel: React.FC<PromptPanelProps> = ({ initialPrompt = '', initialPa
     const handleContentInput = (e: React.FormEvent<HTMLDivElement>) => {
         const target = e.currentTarget;
         const html = target.innerHTML;
-
-        // Parse text
-        const clone = target.cloneNode(true) as HTMLElement;
-        const mentions = clone.querySelectorAll('.mention-tag');
-        mentions.forEach(el => {
-            const value = el.getAttribute('data-mention-value') || el.getAttribute('data-username') || el.getAttribute('data-image-id') || '';
-            el.replaceWith(`@${value}`);
-        });
-
-        let text = clone.innerText;
-        if (text === '\n') text = '';
+        const text = getEditorPlainText(target);
 
         setPrompt(text);
         onPromptChange?.(text);
