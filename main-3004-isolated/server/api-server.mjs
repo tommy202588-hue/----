@@ -13,6 +13,7 @@ const DEFAULT_UPSTREAM_HOSTS = [
   'api.openai.com',
   'generativelanguage.googleapis.com',
   'api.openlux.ai',
+  'fourq.hk',
   'yunwu.ai',
   'api.minimaxi.com',
   'api.xwang.store',

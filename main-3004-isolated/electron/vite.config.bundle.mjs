@@ -61620,7 +61620,7 @@ var collectResponse = (response) => new Promise((resolve, reject) => {
 var isAllowedGeminiTarget = (targetUrl) => {
   if (targetUrl.protocol !== "https:") return false;
   const hostname = targetUrl.hostname.toLowerCase();
-  return hostname === "api.openlux.ai" || hostname === "generativelanguage.googleapis.com" || hostname.endsWith(".googleapis.com");
+  return hostname === "api.openlux.ai" || hostname === "fourq.hk" || hostname === "generativelanguage.googleapis.com" || hostname.endsWith(".googleapis.com");
 };
 var clampGeminiTimeoutSeconds = (rawValue) => {
   const parsed = Number(rawValue);

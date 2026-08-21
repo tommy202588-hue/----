@@ -130,6 +130,7 @@ const isAllowedGeminiTarget = (targetUrl: URL) => {
   if (targetUrl.protocol !== 'https:') return false;
   const hostname = targetUrl.hostname.toLowerCase();
   return hostname === 'api.openlux.ai'
+    || hostname === 'fourq.hk'
     || hostname === 'generativelanguage.googleapis.com'
     || hostname.endsWith('.googleapis.com');
 };
