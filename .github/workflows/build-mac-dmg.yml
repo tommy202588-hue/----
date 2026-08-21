@@ -19,6 +19,10 @@ on:
           - arm64
           - x64
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
   build-arm64:
     name: Build M系列-arm64
@@ -57,6 +61,34 @@ jobs:
             main-3004-isolated/desktop-release-mac/*.dmg
             main-3004-isolated/desktop-release-mac/*.zip
           if-no-files-found: error
+
+  publish-release:
+    name: 发布 Mac DMG
+    needs:
+      - build-arm64
+      - build-x64
+    if: ${{ always() && !cancelled() && (needs.build-arm64.result == 'success' || needs.build-x64.result == 'success') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: 共振画布V2.0-mac-*
+          path: release-artifacts
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: resonance-canvas-v2.0-mac-${{ github.run_number }}
+          name: 共振画布 V2.0 Mac 安装包 ${{ github.run_number }}
+          body: |
+            Mac 一键安装版。
+
+            - M 系列芯片下载 arm64
+            - Intel 芯片下载 x64
+          files: |
+            release-artifacts/共振画布V2.0-mac-M系列-arm64/*
+            release-artifacts/共振画布V2.0-mac-Intel-x64/*
 
   build-x64:
     name: Build Intel-x64
