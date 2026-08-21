@@ -22,7 +22,7 @@ on:
 jobs:
   build-arm64:
     name: Build M系列-arm64
-    if: ${{ inputs.target == 'both' || inputs.target == 'arm64' }}
+    if: ${{ github.event_name == 'push' || inputs.target == 'both' || inputs.target == 'arm64' }}
     runs-on: macos-26
     defaults:
       run:
@@ -60,7 +60,7 @@ jobs:
 
   build-x64:
     name: Build Intel-x64
-    if: ${{ inputs.target == 'both' || inputs.target == 'x64' }}
+    if: ${{ github.event_name == 'push' || inputs.target == 'both' || inputs.target == 'x64' }}
     runs-on: macos-26-intel
     defaults:
       run:
