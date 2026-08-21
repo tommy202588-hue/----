@@ -1,0 +1,97 @@
+{
+  "name": "x-tapnow-3004-isolated",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Independent X-tapnow 3004 canvas editor and generation desktop app",
+  "author": "X-tapnow",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite",
+    "dev:supervised": "node scripts/run-dev-3004.cjs",
+    "build": "vite build",
+    "build:portable": "vite build --mode portable && node scripts/build-portable-html.mjs",
+    "build:desktop": "vite build && node scripts/build-desktop-config.mjs && electron-builder --win nsis --config.artifactName=X-tapnow-3004-Setup.${ext}",
+    "build:desktop:portable": "vite build && node scripts/build-desktop-config.mjs && electron-builder --win portable --config.artifactName=X-tapnow-3004-Portable.${ext}",
+    "build:desktop:mac:arm64": "node scripts/build-mac-installer.mjs --arch=arm64",
+    "build:desktop:mac:x64": "node scripts/build-mac-installer.mjs --arch=x64",
+    "build:local-package": "node scripts/build-local-package.mjs",
+    "preview": "vite preview",
+    "start:api": "node server/api-server.mjs",
+    "test:server": "node --test server/*.test.mjs"
+  },
+  "dependencies": {
+    "@google/genai": "^1.35.0",
+    "@imgly/background-removal": "^1.7.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "autoprefixer": "^10.4.17",
+    "axios": "^1.19.0",
+    "idb-keyval": "^6.2.2",
+    "onnxruntime-web": "^1.21.0",
+    "postcss": "^8.5.26",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwindcss": "^3.4.17",
+    "uuid": "^13.0.1",
+    "vite": "^6.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3",
+    "pm2": "^7.0.3",
+    "typescript": "~5.8.2"
+  },
+  "build": {
+    "appId": "com.xtapnow.canvas3004",
+    "productName": "X-tapnow 3004",
+    "asar": false,
+    "electronDist": "node_modules/electron/dist",
+    "files": [
+      "electron/**/*",
+      "components/**/*",
+      "services/**/*",
+      "public/**/*",
+      "dist/**/*",
+      "types/**/*",
+      "App.tsx",
+      "index.tsx",
+      "index.html",
+      "index.css",
+      "types.ts",
+      "vite.config.ts",
+      "postcss.config.js",
+      "tailwind.config.js",
+      "package.json",
+      "node_modules/**/*",
+      "!node_modules/.vite{,/**/*}",
+      "!node_modules/.vite-desktop{,/**/*}",
+      "!node_modules/.vite-temp{,/**/*}"
+    ],
+    "directories": {
+      "output": "desktop-release"
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    }
+  }
+}

@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: xtapnow_api
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    restart: always
+    environment:
+      API_PORT: 5112
+      ALLOWED_UPSTREAM_HOSTS: ${ALLOWED_UPSTREAM_HOSTS:-api.openai.com,generativelanguage.googleapis.com,api.openlux.ai,yunwu.ai,api.minimaxi.com,api.xwang.store}
+      ALLOWED_DOWNLOAD_HOSTS: ${ALLOWED_DOWNLOAD_HOSTS:-api.openai.com,generativelanguage.googleapis.com,api.openlux.ai,yunwu.ai,api.minimaxi.com,api.xwang.store,*.openai.com,*.oaistatic.com,oaidalleapiprodscus.blob.core.windows.net,oaidalleapiprodweu.blob.core.windows.net,oaidalleapiprodwus.blob.core.windows.net,storage.googleapis.com}
+      PUBLIC_ORIGINS: ${PUBLIC_ORIGINS:-}
+      UPLOAD_PROXY_TARGET: ${UPLOAD_PROXY_TARGET:-}
+      REQUEST_TIMEOUT_MS: ${REQUEST_TIMEOUT_MS:-300000}
+      JSON_BODY_LIMIT_BYTES: ${JSON_BODY_LIMIT_BYTES:-67108864}
+      UPLOAD_BODY_LIMIT_BYTES: ${UPLOAD_BODY_LIMIT_BYTES:-134217728}
+      RESPONSE_BODY_LIMIT_BYTES: ${RESPONSE_BODY_LIMIT_BYTES:-67108864}
+      DOWNLOAD_RESPONSE_LIMIT_BYTES: ${DOWNLOAD_RESPONSE_LIMIT_BYTES:-33554432}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-120}
+      EXPENSIVE_RATE_LIMIT_MAX: ${EXPENSIVE_RATE_LIMIT_MAX:-30}
+      DOWNLOAD_RATE_LIMIT_MAX: ${DOWNLOAD_RATE_LIMIT_MAX:-30}
+      MAX_CONCURRENCY: ${MAX_CONCURRENCY:-8}
+      MAX_CONCURRENCY_PER_IP: ${MAX_CONCURRENCY_PER_IP:-3}
+      MAX_UPLOAD_CONCURRENCY: ${MAX_UPLOAD_CONCURRENCY:-2}
+    expose:
+      - "5112"
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  web:
+    container_name: xtapnow_web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-5111}:80"
+    restart: always
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=32m,noexec,nosuid
+      - /var/run:size=4m,noexec,nosuid
+      - /tmp:size=16m,noexec,nosuid
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

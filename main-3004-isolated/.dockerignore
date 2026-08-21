@@ -1,0 +1,18 @@
+node_modules
+dist
+dist-*
+desktop-release
+local-package-*
+release
+release-*
+backups
+.agents
+.git
+.env*
+*.log
+test-*.png
+*.xtcanvas
+X-tapnow-*-remote.html
+X-tapnow-*-standalone.html
+共振画布 双击打开即可*.html
+.DS_Store
